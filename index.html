@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Verónica ♫</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --card-front: #13141c;
+            --card-back: #181a24;
+            --text-main: #e8e8e8;
+            --cas-pink: #f5a3b7;
+            --marias-gold: #d4af37;
+            --harry-blue: #7ca1c9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(245, 163, 183, 0.05), transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(212, 175, 55, 0.05), transparent 30%),
+                radial-gradient(circle at 50% 50%, rgba(124, 161, 201, 0.03), transparent 40%);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 1rem;
+        }
+
+        /* Notas flotantes */
+        .music-notes {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: -1; overflow: hidden;
+        }
+        .note {
+            position: absolute; font-size: 1.5rem; opacity: 0.1;
+            animation: floatNote 20s infinite linear; color: #fff;
+        }
+        @keyframes floatNote {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.15; }
+            80% { opacity: 0.15; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Encabezado */
+        header {
+            text-align: center; margin-bottom: 3rem;
+            animation: fadeIn 2s ease-out;
+        }
+        header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem; font-weight: 400; font-style: italic;
+            background: linear-gradient(90deg, var(--cas-pink), var(--marias-gold), var(--harry-blue));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(245, 163, 183, 0.2);
+        }
+
+        /* Visualizador */
+        .visualizer {
+            display: flex; justify-content: center; gap: 5px;
+            height: 40px; align-items: flex-end; margin-bottom: 1.5rem;
+            margin-top: 1rem;
+        }
+        .bar {
+            width: 4px; background: var(--cas-pink); border-radius: 2px;
+            animation: bounce 1.2s ease-in-out infinite;
+        }
+        .bar:nth-child(2) { background: var(--marias-gold); animation-delay: 0.1s; }
+        .bar:nth-child(3) { background: var(--harry-blue); animation-delay: 0.2s; }
+        .bar:nth-child(4) { background: var(--cas-pink); animation-delay: 0.3s; }
+        .bar:nth-child(5) { background: var(--marias-gold); animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 100% { height: 10px; }
+            50% { height: 40px; }
+        }
+
+        /* SECCIÓN INTERACTIVA DE BANDAS */
+        .band-intro {
+            max-width: 1100px;
+            width: 100%;
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+        .band-intro h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem; font-style: italic; color: #ccc;
+            margin-bottom: 0.5rem;
+        }
+        .band-intro > p {
+            font-size: 0.85rem; color: #666; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 3rem;
+        }
+
+        .band-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .band-portal {
+            background: linear-gradient(145deg, #13141c, #0b0c12);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 3rem 1.5rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .band-portal:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.15);
+        }
+        .band-portal.active {
+            border-color: currentColor;
+            box-shadow: 0 0 40px rgba(255,255,255,0.05);
+        }
+        .band-portal.active .portal-icon {
+            transform: scale(1.2) rotate(0deg);
+        }
+        .band-portal.active .portal-hint {
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+        .band-portal.active .portal-reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .band-portal.cas { color: var(--cas-pink); }
+        .band-portal.marias { color: var(--marias-gold); }
+        .band-portal.harry { color: var(--harry-blue); }
+
+        .portal-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: block;
+        }
+        .band-portal.marias .portal-icon { animation: spin 8s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .band-portal.harry .portal-icon { animation: heartbeat 1.5s ease-in-out infinite; }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.15); }
+        }
+
+        .portal-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+        .portal-hint {
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: absolute;
+            bottom: 2rem;
+            transition: all 0.5s ease;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        .portal-reveal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease 0.3s;
+            background: linear-gradient(145deg, #0f1018, #08090d);
+            border-radius: 20px;
+        }
+        .portal-reveal p {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #d0d0d0;
+            font-weight: 300;
+            font-style: italic;
+            padding: 0 0.5rem;
+        }
+        .portal-reveal .heart-icon {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+            opacity: 0.6;
+        }
+
+        /* Mensaje de desbloqueo */
+        .unlock-message {
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease;
+            pointer-events: none;
+        }
+        .unlock-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .unlock-message h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem; font-style: italic;
+            color: var(--marias-gold);
+            margin-bottom: 0.8rem;
+        }
+        .unlock-message p {
+            font-size: 0.9rem; color: #aaa; letter-spacing: 1px;
+        }
+
+        /* SECCIÓN DE CARTAS */
+        .cards-section {
+            max-width: 1200px;
+            width: 100%;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: opacity 1.5s ease, max-height 1.5s ease;
+        }
+        .cards-section.show {
+            opacity: 1;
+            max-height: 5000px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            width: 100%;
+            perspective: 2000px;
+        }
+
+        .card {
+            height: 520px;
+            cursor: pointer;
+            perspective: 1000px;
+            transition: transform 0.4s ease;
+        }
+        .card:hover { transform: translateY(-8px); }
+
+        .card-inner {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .card.is-flipped .card-inner { transform: rotateY(180deg); }
+
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 20px; display: flex; flex-direction: column;
+            padding: 1.8rem; border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #16171f, #0d0e14);
+            justify-content: center; align-items: center;
+            border-bottom: 4px solid var(--cas-pink);
+        }
+        .card-front .letter {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 7rem; font-weight: 600; color: var(--cas-pink);
+            text-shadow: 0 0 40px rgba(245, 163, 183, 0.4);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-back {
+            background: linear-gradient(145deg, #181a24, #0f1118);
+            transform: rotateY(180deg);
+            border-top: 4px solid var(--marias-gold);
+            justify-content: flex-start; text-align: left;
+            overflow-y: auto;
+        }
+        .card-back::-webkit-scrollbar { width: 4px; }
+        .card-back::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+        .card-back.cas-vibe { border-top-color: var(--cas-pink); }
+        .card-back.cas-vibe h3 { color: var(--cas-pink); }
+        .card-back.marias-vibe { border-top-color: var(--marias-gold); }
+        .card-back.marias-vibe h3 { color: var(--marias-gold); }
+        .card-back.harry-vibe { border-top-color: var(--harry-blue); }
+        .card-back.harry-vibe h3 { color: var(--harry-blue); }
+
+        .vibe-tag {
+            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px;
+            color: #666; margin-bottom: 0.6rem; display: block;
+        }
+
+        .song-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem; font-style: italic; color: #fff;
+            margin-bottom: 0.8rem; display: flex; align-items: center;
+            gap: 8px; padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .song-title .note-icon { font-size: 0.9rem; }
+        .song-title .song-band {
+            font-size: 0.65rem; font-family: 'Montserrat', sans-serif;
+            color: #888; font-style: normal; font-weight: 300;
+            margin-left: auto; text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-back h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem; font-style: italic;
+            margin-bottom: 0.8rem; font-weight: 600;
+        }
+
+        .card-back p {
+            font-size: 0.82rem; line-height: 1.7;
+            color: #c0c0c0; font-weight: 300;
+            margin-bottom: 0.8rem;
+        }
+        .card-back p strong { color: #fff; font-weight: 600; }
+
+        .song-reason {
+            margin-top: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.03);
+            border-left: 2px solid currentColor;
+            border-radius: 0 8px 8px 0;
+        }
+        .song-reason .reason-label {
+            font-size: 0.6rem; text-transform: uppercase;
+            letter-spacing: 2px; color: #777;
+            display: block; margin-bottom: 0.4rem;
+        }
+        .song-reason p {
+            font-size: 0.78rem; font-style: italic;
+            color: #a8a8a8; line-height: 1.6;
+            margin-bottom: 0;
+        }
+        .card-back.cas-vibe .song-reason { color: var(--cas-pink); }
+        .card-back.marias-vibe .song-reason { color: var(--marias-gold); }
+        .card-back.harry-vibe .song-reason { color: var(--harry-blue); }
+
+        /* SOBRE FINAL */
+        .final-btn-container {
+            margin-top: 5rem; text-align: center;
+            opacity: 0; transition: opacity 1s ease 0.5s;
+            pointer-events: none;
+        }
+        .final-btn-container.show {
+            opacity: 1; pointer-events: auto;
+        }
+        .envelope-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 6rem;
+            line-height: 1;
+            padding: 1rem;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.5s ease;
+            filter: drop-shadow(0 0 20px rgba(245, 163, 183, 0.4));
+            animation: floatEnvelope 3s ease-in-out infinite;
+            position: relative;
+        }
+        .envelope-btn:hover {
+            transform: scale(1.2) rotate(-5deg);
+            filter: drop-shadow(0 0 40px rgba(245, 163, 183, 0.8));
+        }
+        @keyframes floatEnvelope {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+        }
+        .envelope-btn::after {
+            content: 'Ábreme';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--cas-pink);
+            white-space: nowrap;
+            opacity: 0.7;
+            letter-spacing: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; pointer-events: none;
+            transition: opacity 0.6s ease; padding: 1rem;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: linear-gradient(145deg, #181a24, #0d0e14);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            padding: 3.5rem 2.5rem; border-radius: 25px;
+            max-width: 650px; text-align: center; position: relative;
+            box-shadow: 0 0 80px rgba(212, 175, 55, 0.15);
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal.active .modal-content { transform: translateY(0) scale(1); }
+        .modal-content h2 {
+            font-family: 'Cormorant Garamond', serif;
+            color: var(--cas-pink); font-size: 2.5rem;
+            margin-bottom: 1.5rem; font-style: italic;
+        }
+        .modal-content p {
+            font-size: 1.05rem; line-height: 1.9;
+            color: #d0d0d0; margin-bottom: 1.5rem; font-weight: 300;
+        }
+        .modal-content p:last-of-type { margin-bottom: 2rem; }
+        .modal-content .highlight {
+            color: var(--marias-gold); font-weight: 600; font-style: italic;
+        }
+
+        /* Frase final especial */
+        .final-phrase {
+            margin: 2rem 0;
+            padding: 1.5rem 1rem;
+            border-top: 1px solid rgba(245, 163, 183, 0.3);
+            border-bottom: 1px solid rgba(245, 163, 183, 0.3);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.15rem;
+            font-style: italic;
+            line-height: 2;
+            color: var(--cas-pink);
+        }
+        .final-phrase .te-amo {
+            display: block;
+            margin-top: 1rem;
+            font-size: 1.4rem;
+            color: var(--marias-gold);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .close-btn {
+            background: linear-gradient(90deg, var(--cas-pink), var(--marias-gold));
+            color: #0a0a0f; border: none; padding: 1rem 2.5rem;
+            border-radius: 30px; font-family: 'Montserrat', sans-serif;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 2px;
+            cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .close-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(245, 163, 183, 0.5);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.5rem; }
+            .cards-container { grid-template-columns: 1fr; }
+            .card { height: 560px; }
+            .card-front .letter { font-size: 6rem; }
+            .modal-content { padding: 2rem 1.5rem; }
+            .modal-content h2 { font-size: 2rem; }
+            .envelope-btn { font-size: 5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="music-notes" id="musicNotes"></div>
+
+    <header>
+        <h1>Para Verónica</h1>
+        <div class="visualizer">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            <div class="bar"></div><div class="bar"></div>
+        </div>
+    </header>
+
+    <!-- FASE 1: INTERACTIVA DE BANDAS -->
+    <section class="band-intro" id="bandIntro">
+        <h2>Antes de empezar...</h2>
+        <p>Toca cada banda para sentir su vibra</p>
+
+        <div class="band-grid">
+            <!-- Cigarettes After Sex -->
+            <div class="band-portal cas" onclick="activateBand(this)" data-band="cas">
+                <span class="portal-icon">🌧️</span>
+                <div class="portal-name">Cigarettes After Sex</div>
+                <div class="portal-hint">Toca para sentir</div>
+                <div class="portal-reveal">
+                    <p>"Hay amores que se sienten como la lluvia suave: no hacen ruido, pero empapan el alma. Este es el espacio de lo vulnerable, de lo que se dice en voz baja, de lo que se siente sin miedo."</p>
+                    <span class="heart-icon">🤍</span>
+                </div>
+            </div>
+
+            <!-- The Marías -->
+            <div class="band-portal marias" onclick="activateBand(this)" data-band="marias">
+                <span class="portal-icon">💿</span>
+                <div class="portal-name">The Marías</div>
+                <div class="portal-hint">Toca para sentir</div>
+                <div class="portal-reveal">
+                    <p>"Hay amores que se sienten como un bolero eterno: elegantes, profundos, con ese toque de misterio que te invita a quedarte. Aquí vive la paciencia, la eternidad y el deseo de seguir descubriéndote."</p>
+                    <span class="heart-icon">🤍</span>
+                </div>
+            </div>
+
+            <!-- Harry Styles -->
+            <div class="band-portal harry" onclick="activateBand(this)" data-band="harry">
+                <span class="portal-icon">💛</span>
+                <div class="portal-name">Harry Styles</div>
+                <div class="portal-hint">Toca para sentir</div>
+                <div class="portal-reveal">
+                    <p>"Hay amores que se sienten como un abrazo sincero: sin filtros, sin máscaras, con la valentía de mostrarse tal cual es. Aquí vive la honestidad, el 'aquí y ahora' y las ganas de comerse el mundo juntos."</p>
+                    <span class="heart-icon">🤍</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mensaje de desbloqueo -->
+    <div class="unlock-message" id="unlockMessage">
+        <h3>Ahora sí, mi amor...</h3>
+        <p>Desliza y toca cada letra de tu nombre. Cada una guarda una canción, un sentimiento y una razón.</p>
+    </div>
+
+    <!-- FASE 2: CARTAS -->
+    <section class="cards-section" id="cardsSection">
+        <div class="cards-container">
+
+            <!-- V -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">V</div>
+                    </div>
+                    <div class="card-back marias-vibe">
+                        <span class="vibe-tag">Vibras de The Marías</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>Vicious</em>
+                            <span class="song-band">The Marías</span>
+                        </div>
+                        <h3>Vulnerabilidad</h3>
+                        <p>Si te soy honesto, antes me daba un miedo terrible amar y mostrar mis sentimientos. Pero tú hiciste que todo eso se fuera. Ahora entiendo que <strong>no puedo dejar de amarte con toda mi alma.</strong> No hay dudas, solo tú.</p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque "Vicious" habla de un amor que te atrapa sin pedir permiso, uno que duele y sana al mismo tiempo. Y así me pasa contigo: me atrapaste sin avisar, y ya no quiero soltarte.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- E -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">E</div>
+                    </div>
+                    <div class="card-back harry-vibe">
+                        <span class="vibe-tag">Latidos de Harry Styles</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>Ever Since New York</em>
+                            <span class="song-band">Harry Styles</span>
+                        </div>
+                        <h3>Eternidad</h3>
+                        <p>Mientras el mundo no deje de existir y nos volvamos polvo, mi corazón siempre, siempre buscará al tuyo. No quiero que seamos un "en otra vida". <strong>Te quiero en esta, aquí y ahora, con los dos eligiéndonos.</strong></p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque desde que te conocí, todo cambió. "Ever Since New York" habla de ese momento en que algo te marca para siempre. Para mí, ese momento fuiste tú. Y desde entonces, mi corazón no ha dejado de buscarte.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- R -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">R</div>
+                    </div>
+                    <div class="card-back marias-vibe">
+                        <span class="vibe-tag">Susurros de The Marías</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>Real Life</em>
+                            <span class="song-band">The Marías</span>
+                        </div>
+                        <h3>Refugio</h3>
+                        <p>Quiero ser feliz a tu lado, pero sobre todo quiero estar cuando sientas que ya no puedes más. Para abrazarte fuerte y recordarte que si te lo propones, <strong>puedes con el mundo entero.</strong> No todo será perfecto, pero de eso se trata.</p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque "Real Life" habla de querer escapar de la realidad, pero encontrar a alguien que hace que la realidad valga la pena. Tú eres mi refugio, Verónica. Contigo, hasta lo difícil se siente bonito.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- O -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">O</div>
+                    </div>
+                    <div class="card-back marias-vibe">
+                        <span class="vibe-tag">Susurros de The Marías</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>Only in My Dreams</em>
+                            <span class="song-band">The Marías</span>
+                        </div>
+                        <h3>Oportunidad</h3>
+                        <p>Te daría cada pedacito de mí con tal de arreglar cualquier daño que te haya causado. Lo único que deseo es verte feliz siempre. <strong>Me tomo esta oportunidad con el corazón en la mano</strong>, porque sé que mi amor por ti es más fuerte que mis errores.</p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque antes, cuando te perdí, solo podía tenerte en mis sueños. "Only in My Dreams" era mi realidad. Pero ahora tengo la oportunidad de tenerte despierto, de demostrarte que merezco estar a tu lado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- N -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">N</div>
+                    </div>
+                    <div class="card-back cas-vibe">
+                        <span class="vibe-tag">Vibras de Cigarettes After Sex</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>Nothing's Gonna Hurt You Baby</em>
+                            <span class="song-band">Cigarettes After Sex</span>
+                        </div>
+                        <h3>No será fácil</h3>
+                        <p>No va a ser fácil. Va a ser muy difícil. Y vamos a tener que aprender todos los días, pero quiero hacerlo porque te quiero. <strong>Te quiero toda, para siempre, tú y yo, todos los días.</strong> Sin miedo, sin dudas, solo nosotros.</p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque es una promesa. "Nothing's Gonna Hurt You Baby" es decirte: aunque el camino sea difícil, yo voy a estar ahí para que nada te lastime. Quiero ser tu escudo, tu calma, tu hogar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- I -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">I</div>
+                    </div>
+                    <div class="card-back marias-vibe">
+                        <span class="vibe-tag">Susurros de The Marías</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>If Only</em>
+                            <span class="song-band">The Marías</span>
+                        </div>
+                        <h3>Intento</h3>
+                        <p>Si todavía nos queremos, tengamos el valor de intentarlo otra vez. No quiero que seamos un "qué hubiera pasado". <strong>Prefiero que sea aquí, ahora y con los dos eligiéndonos</strong>, porque mi alma, mi cuerpo y mi corazón te eligen a ti.</p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque "If Only" habla de esas cosas que no dijimos, de los "si tan solo...". Yo no quiero más "si tan solo". Quiero intentarlo contigo, aquí y ahora. Sin arrepentimientos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">C</div>
+                    </div>
+                    <div class="card-back cas-vibe">
+                        <span class="vibe-tag">Vibras de Cigarettes After Sex</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>Cry</em>
+                            <span class="song-band">Cigarettes After Sex</span>
+                        </div>
+                        <h3>Conocimiento</h3>
+                        <p>Quiero conocerte completa. No quiero solamente la parte bonita de ti; quiero entenderte, acompañarte y estar ahí cuando necesites a alguien. <strong>Quiero seguir enamorándome de ti en diferentes etapas</strong>, mientras la vida me dé la oportunidad.</p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque "Cry" es esa canción que te abraza cuando lloras. Y yo quiero ser eso para ti: el lugar donde puedas llorar sin miedo, donde puedas ser vulnerable. Quiero conocerte en la luz y en la sombra.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A -->
+            <div class="card" onclick="this.classList.toggle('is-flipped')">
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="letter">A</div>
+                    </div>
+                    <div class="card-back harry-vibe">
+                        <span class="vibe-tag">Latidos de Harry Styles</span>
+                        <div class="song-title">
+                            <span class="note-icon">♫</span> <em>Adore You</em>
+                            <span class="song-band">Harry Styles</span>
+                        </div>
+                        <h3>Amor</h3>
+                        <p>Solo a ti te quiero abrazar, solo a ti te quiero dar todo mi cariño. En la Biblia dice que el amor es paciente, y si es por ti, <strong>yo esperaría toda mi vida si es necesario.</strong> Porque amarte es la decisión más bonita que he tomado.</p>
+                        <div class="song-reason">
+                            <span class="reason-label">Por qué esta canción</span>
+                            <p>Porque "Adore You" no es solo quererte: es adorarte. Es caminar mil millas, cruzar el mar, hacer lo que sea por verte sonreír. Y yo haría eso y más por ti, Verónica. Te adoro.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="final-btn-container" id="finalBtnContainer">
+        <button class="envelope-btn" onclick="openModal()" aria-label="Abrir carta">💌</button>
+    </div>
+
+    <!-- Modal Final -->
+    <div class="modal" id="finalModal">
+        <div class="modal-content">
+            <h2>Mi confesión final</h2>
+            <p>Verónica, no te traigo promesas vacías. Te traigo mi alma desnuda.</p>
+            <p>Sé que la situación es delicada y que te fallé. Pero hoy quiero que sepas que <span class="highlight">mis dudas e inseguridades ya no son un problema.</span></p>
+            <p>Confío plenamente en que mi alma, mi cuerpo y mi corazón te aman profundamente. Te pido una oportunidad más, no para prometerte que nunca fallaré, sino para <span class="highlight">demostrarte que mi amor por ti es más fuerte que mis errores.</span></p>
+
+            <div class="final-phrase">
+                Por ti haría lo imposible, vería lo invisible,<br>
+                tocaría lo intocable y rompería lo irrompible.<br>
+                Si lo permites, mi amor por ti superará cualquier barrera.
+                <span class="te-amo">Te amo, Verónica.</span>
+            </div>
+
+            <button class="close-btn" onclick="closeModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // Notas flotantes
+        const notesContainer = document.getElementById('musicNotes');
+        const notes = ['♪', '♫', '♩', '♬', '♭'];
+        for (let i = 0; i < 20; i++) {
+            const note = document.createElement('div');
+            note.classList.add('note');
+            note.textContent = notes[Math.floor(Math.random() * notes.length)];
+            note.style.left = `${Math.random() * 100}%`;
+            note.style.animationDelay = `${Math.random() * 20}s`;
+            note.style.animationDuration = `${Math.random() * 15 + 15}s`;
+            note.style.fontSize = `${Math.random() * 2 + 1}rem`;
+            notesContainer.appendChild(note);
+        }
+
+        // Lógica de activación de bandas
+        const activatedBands = new Set();
+        const totalBands = 3;
+
+        function activateBand(element) {
+            const band = element.dataset.band;
+            if (activatedBands.has(band)) return;
+            activatedBands.add(band);
+            element.classList.add('active');
+
+            if (activatedBands.size === totalBands) {
+                setTimeout(revealCards, 800);
+            }
+        }
+
+        function revealCards() {
+            document.getElementById('unlockMessage').classList.add('show');
+            document.getElementById('bandIntro').style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            document.getElementById('bandIntro').style.opacity = '0.3';
+            document.getElementById('bandIntro').style.transform = 'scale(0.95)';
+
+            setTimeout(() => {
+                const cardsSection = document.getElementById('cardsSection');
+                cardsSection.classList.add('show');
+                document.getElementById('finalBtnContainer').classList.add('show');
+                cardsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 1200);
+        }
+
+        // Modal
+        function openModal() {
+            document.getElementById('finalModal').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('finalModal').classList.remove('active');
+        }
+        document.getElementById('finalModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body>
+</html>
